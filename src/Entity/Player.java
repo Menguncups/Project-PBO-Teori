@@ -2,6 +2,7 @@ package Entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -14,16 +15,27 @@ public class Player extends Entity {
     GamePanel gamePanel;
     Keybind keyBind;
 
+    public final int screenX, screenY;
+
     public Player(GamePanel gamePanel, Keybind keyBind) {
         this.gamePanel = gamePanel;
         this.keyBind = keyBind;
+        screenX = gamePanel.screenWidth / 2 - (gamePanel.perbesarKotak / 2);
+        screenY = gamePanel.screenHeight / 2 - (gamePanel.perbesarKotak / 2);
+
+        solidArea = new Rectangle();
+        solidArea.x = 15;
+        solidArea.y = 30;
+        solidArea.width = 34;
+        solidArea.height = 34;
+
         posisiAwal();
         getJalanPlayer();
     }
 
     public void posisiAwal() {
-        posisiX = 100;
-        posisiY = 100;
+        worldX = gamePanel.ukuranKotak * 19; // untuk meletakan posisi awal player
+        worldY = gamePanel.ukuranKotak * 21;
         kecepatanBergerak = 4;
         arah = "kanan";
     }
@@ -32,13 +44,15 @@ public class Player extends Entity {
         try {
             for (int i = 0; i < 9; i++) {
                 jalanAtas[i] = ImageIO.read(
-                        getClass().getResourceAsStream("/Sprite_Sheet/Player/Jalan_Atas_/Jalan_Atas_" + i + ".png"));
+                        getClass().getResourceAsStream("/Gambar/Player/Jalan_Atas_/Fighter_Jalan_Atas_" + i + ".png"));
                 jalanBawah[i] = ImageIO.read(
-                        getClass().getResourceAsStream("/Sprite_Sheet/Player/Jalan_Bawah_/Jalan_Bawah_" + i + ".png"));
+                        getClass()
+                                .getResourceAsStream("/Gambar/Player/Jalan_Bawah_/Fighter_Jalan_Bawah_" + i + ".png"));
                 jalanKiri[i] = ImageIO.read(
-                        getClass().getResourceAsStream("/Sprite_Sheet/Player/Jalan_Kiri_/Jalan_Kiri_" + i + ".png"));
+                        getClass().getResourceAsStream("/Gambar/Player/Jalan_Kiri_/Fighter_Jalan_Kiri_" + i + ".png"));
                 jalanKanan[i] = ImageIO.read(
-                        getClass().getResourceAsStream("/Sprite_Sheet/Player/Jalan_Kanan_/Jalan_Kanan_" + i + ".png"));
+                        getClass()
+                                .getResourceAsStream("/Gambar/Player/Jalan_Kanan_/Fighter_Jalan_Kanan_" + i + ".png"));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,27 +62,51 @@ public class Player extends Entity {
     public void update() {
         boolean bergerak = false;
 
+        // ✅ Gunakan if-else supaya hanya 1 arah yang aktif
         if (keyBind.keAtas == true) {
             arah = "atas";
-            posisiY -= kecepatanBergerak;
             bergerak = true;
-        }
-        if (keyBind.keBawah == true) {
+        } else if (keyBind.keBawah == true) {
             arah = "bawah";
-            posisiY += kecepatanBergerak;
             bergerak = true;
-        }
-        if (keyBind.keKiri == true) {
+        } else if (keyBind.keKiri == true) {
             arah = "kiri";
-            posisiX -= kecepatanBergerak;
             bergerak = true;
-        }
-        if (keyBind.keKanan == true) {
+        } else if (keyBind.keKanan == true) {
             arah = "kanan";
-            posisiX += kecepatanBergerak;
             bergerak = true;
         }
+
+        // Hanya cek collision jika player memang bergerak
         if (bergerak) {
+            collisionOn = false;
+            gamePanel.collisioinCheck.checkTile(this);
+
+            // Bergerak hanya jika tidak ada collision
+            if (collisionOn == false) {
+                switch (arah) {
+                    case "atas":
+                        worldY -= kecepatanBergerak;
+                        break;
+
+                    case "bawah":
+                        worldY += kecepatanBergerak;
+                        break;
+
+                    case "kiri":
+                        worldX -= kecepatanBergerak;
+                        break;
+
+                    case "kanan":
+                        worldX += kecepatanBergerak;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            // Update animasi
             spriteCounter++;
             if (spriteCounter > 5) {
                 spriteNumber++;
@@ -77,14 +115,14 @@ public class Player extends Entity {
                 spriteCounter = 0;
             }
         } else {
+            // Reset animasi saat tidak bergerak
             spriteNumber = 0;
         }
-
     }
 
     public void draw(Graphics2D g2) {
         // g2.setColor(Color.WHITE);
-        // g2.fillRect(posisiX, posisiY, gamePanel.perbesarKotak,
+        // g2.fillRect(worldX, worldY, gamePanel.perbesarKotak,
         // gamePanel.perbesarKotak);
         BufferedImage gambar = null;
 
@@ -105,7 +143,7 @@ public class Player extends Entity {
                 break;
         }
 
-        g2.drawImage(gambar, posisiX, posisiY,
+        g2.drawImage(gambar, screenX, screenY,
                 gamePanel.perbesarKotak, gamePanel.perbesarKotak, null);
 
     }
