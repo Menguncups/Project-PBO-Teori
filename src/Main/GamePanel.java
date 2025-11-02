@@ -8,30 +8,33 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 
 import Entity.Player;
+import Map.PengelolaMap;
 
 public class GamePanel extends JPanel implements Runnable {
 
     // Setinggan screen
-    final int ukuranKotak = 64; // 64 x 64
-    final int scale = 2;
+    public final int ukuranKotak = 64; // 64 x 64
+    final int scale = 1;
 
-    public final int perbesarKotak = ukuranKotak * scale; // 128 x 128
-    final int maxScreenColumn = 16;
-    final int maxScreenRow = 9;
-    final int screenWidth = (perbesarKotak * 2) * maxScreenColumn; // 1920
-    final int screenHeight = (perbesarKotak * 2) * maxScreenRow; // 1080
+    public final int perbesarKotak = ukuranKotak * scale; // 64 x 64
+    public final int maxScreenColumn = 16;
+    public final int maxScreenRow = 9;
+    public final int screenWidth = perbesarKotak * maxScreenColumn; // 1920
+    public final int screenHeight = perbesarKotak * maxScreenRow; // 1080
+
+    // world
+    public final int maxWorldCol = 100;
+    public final int maxWorldRow = 100;
+    public final int worldWidth = ukuranKotak * maxScreenColumn;
+    public final int worldHeight = ukuranKotak * maxScreenRow;
 
     // FPS
     int FPS = 60;
-
-    Thread gameThread;
+    PengelolaMap pengelolaMap = new PengelolaMap(this);
     Keybind keyBind = new Keybind();
-    Player player = new Player(this, keyBind);
-
-    // * posisi awal player
-    int posisiYPlayer = 100;
-    int posisiXPlayer = 100;
-    int kecepatanPlayer = 4;
+    Thread gameThread;
+    public CollisioinCheck collisioinCheck = new CollisioinCheck(this);
+    public Player player = new Player(this, keyBind);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -86,7 +89,7 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
-
+        pengelolaMap.gambar(g2);
         player.draw(g2);
 
         g2.dispose();
