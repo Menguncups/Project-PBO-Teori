@@ -1,6 +1,5 @@
 package Entity;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -12,13 +11,14 @@ import Main.GamePanel;
 import Main.Keybind;
 
 public class Player extends Entity {
-    GamePanel gamePanel;
     Keybind keyBind;
 
     public final int screenX, screenY;
+    int hasKey = 0;
+    int useKey = 0;
 
     public Player(GamePanel gamePanel, Keybind keyBind) {
-        this.gamePanel = gamePanel;
+        super(gamePanel);
         this.keyBind = keyBind;
         screenX = gamePanel.screenWidth / 2 - (gamePanel.perbesarKotak / 2);
         screenY = gamePanel.screenHeight / 2 - (gamePanel.perbesarKotak / 2);
@@ -26,6 +26,8 @@ public class Player extends Entity {
         solidArea = new Rectangle();
         solidArea.x = 15;
         solidArea.y = 30;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
         solidArea.width = 34;
         solidArea.height = 34;
 
@@ -34,8 +36,8 @@ public class Player extends Entity {
     }
 
     public void posisiAwal() {
-        worldX = gamePanel.ukuranKotak * 19; // untuk meletakan posisi awal player
-        worldY = gamePanel.ukuranKotak * 21;
+        worldX = gamePanel.ukuranKotak * 49; // untuk meletakan posisi awal player
+        worldY = gamePanel.ukuranKotak * 36;
         kecepatanBergerak = 4;
         arah = "kanan";
     }
@@ -81,6 +83,12 @@ public class Player extends Entity {
         if (bergerak) {
             collisionOn = false;
             gamePanel.collisioinCheck.checkTile(this);
+            //
+            int objIndex = gamePanel.collisioinCheck.checkObject(this, true);
+            pickUpObject(objIndex);
+            // ngecheck npc collision
+            int npcIndex = gamePanel.collisioinCheck.checkEntity(this, gamePanel.npc);
+            interactNPC(npcIndex);
 
             // Bergerak hanya jika tidak ada collision
             if (collisionOn == false) {
@@ -120,6 +128,49 @@ public class Player extends Entity {
         }
     }
 
+    public void pickUpObject(int i) {
+        if (i != 999) {
+            String objectName = gamePanel.obj[i].name;
+            switch (objectName) {
+                case "Key":
+                    hasKey++;
+                    gamePanel.obj[i] = null;
+                    gamePanel.playSE(2);
+                    break;
+                case "DoorLeft":
+                    if (hasKey > 0) {
+                        gamePanel.obj[i] = null;
+                        gamePanel.playSE(1);
+                        useKey++;
+                        if (useKey > 1) {
+                            hasKey--;
+                        }
+                    }
+                    break;
+                case "DoorRight":
+                    if (hasKey > 0) {
+                        gamePanel.obj[i] = null;
+                        gamePanel.playSE(1);
+                        useKey++;
+                        if (useKey > 1) {
+                            hasKey--;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void interactNPC(int i) {
+        if (i != 999) {
+            gamePanel.gameState = gamePanel.dialogueState;
+            gamePanel.ui.currentDialogIndex = 0;
+            gamePanel.ui.currentDialog = gamePanel.npc[i].dialouges[gamePanel.ui.currentDialogIndex];
+        }
+    }
+
     public void draw(Graphics2D g2) {
         // g2.setColor(Color.WHITE);
         // g2.fillRect(worldX, worldY, gamePanel.perbesarKotak,
@@ -145,6 +196,10 @@ public class Player extends Entity {
 
         g2.drawImage(gambar, screenX, screenY,
                 gamePanel.perbesarKotak, gamePanel.perbesarKotak, null);
+        g2.setColor(java.awt.Color.RED);
+        int collisionX = screenX + solidArea.x;
+        int collisionY = screenY + solidArea.y;
+        g2.drawRect(collisionX, collisionY, solidArea.width, solidArea.height);
 
     }
 }

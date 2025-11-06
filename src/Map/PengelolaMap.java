@@ -26,8 +26,8 @@ public class PengelolaMap {
     public void loadMap() {
         try {
             // Pastikan path sesuai dengan lokasi file
-            InputStream is = getClass().getResourceAsStream("/Gambar/Map/Map_Atas/Map_Atas.txt");
-
+            InputStream is = getClass().getResourceAsStream("/Gambar/Map/Map_Atas/Map_Atas_Ngetes.txt");
+            // src\Asset\Map\Map_Atas\Map_Atas_Ngetes.txt
             if (is == null) {
                 System.out.println("ERROR: File Map_tes.txt tidak ditemukan!");
                 return;
@@ -61,37 +61,40 @@ public class PengelolaMap {
             e.printStackTrace();
         }
     }
-public void getKotakGambar() {
-    try {
-        // daftar tile yang punya collision (ubah sesuai kebutuhanmu)
-        int[] tileCollision = {0, 2, 3, 14, 15, 27, 28, 29, 30, 31, 32, 36, 37, 38,39,40,41,42,43,44,45,53,56,57,58,59,60,61,62,63,64,65};
 
-        for (int i = 0; i <= 65; i++) {
-            map[i] = new Map();
-            String namaFile = String.format("/Gambar/Map/Map_Atas/Asset_Map_Atas/%03d.png", i);
-            InputStream is = getClass().getResourceAsStream(namaFile);
+    public void getKotakGambar() {
+        try {
+            // daftar tile yang punya collision (ubah sesuai kebutuhanmu)
+            int[] tileCollision = { 0, 2, 3, 14, 15, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 53,
+                    56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 48, 49, 50, 51, 52 };
 
-            if (is == null) {
-                System.out.println("File tidak ditemukan: " + namaFile);
-                continue;
-            }
+            for (int i = 0; i <= 65; i++) {
+                map[i] = new Map();
+                String namaFile = String.format("/Gambar/Map/Map_Atas/Asset_Map_Atas/%03d.png", i);
+                InputStream is = getClass().getResourceAsStream(namaFile);
+                // src\Asset\Map\Map_Atas\Asset_Map_Atas\000.png
+                // src\Asset\Map\Map_Atas\Asset_Map_Atas\000.png
+                if (is == null) {
+                    System.out.println("File tidak ditemukan: " + namaFile);
+                    continue;
+                }
 
-            map[i].gambar = ImageIO.read(is);
+                map[i].gambar = ImageIO.read(is);
 
-            // Cek apakah tile ini termasuk dalam daftar collision
-            map[i].bertabrakan = false;
-            for (int coll : tileCollision) {
-                if (i == coll) {
-                    map[i].bertabrakan = true;
-                    break;
+                // Cek apakah tile ini termasuk dalam daftar collision
+                map[i].bertabrakan = false;
+                for (int coll : tileCollision) {
+                    if (i == coll) {
+                        map[i].bertabrakan = true;
+                        break;
+                    }
                 }
             }
+            System.out.println("Semua tile berhasil di-load");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.println("Semua tile berhasil di-load");
-    } catch (IOException e) {
-        e.printStackTrace();
     }
-}
 
     public void gambar(Graphics2D g2) {
         int worldCol = 0;
