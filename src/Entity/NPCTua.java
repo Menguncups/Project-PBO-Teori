@@ -13,9 +13,10 @@ public class NPCTua extends Entity {
 
     public NPCTua(GamePanel gamePanel) {
         super(gamePanel);
+        name = "NPCTua";
         arah = "bawah";
-        kecepatanBergerak = 1;
-        getJalanNPC();
+        kecepatanBergerak = 2;
+        getJalanNPC(9);
         solidArea.x = 15;
         solidArea.y = 30;
         solidArea.width = 34;
@@ -26,47 +27,32 @@ public class NPCTua extends Entity {
     }
 
     public void speak() {
+        isTalking = true;
         gamePanel.ui.currentDialog = dialouges[0];
+
+        switch (gamePanel.player.arah) {
+            case "atas":
+                arah = "bawah";
+                break;
+            case "bawah":
+                arah = "atas";
+                break;
+            case "kiri":
+                arah = "kanan";
+                break;
+            case "kanan":
+                arah = "kiri";
+                break;
+
+            default:
+                break;
+        }
     }
 
     public void setDialog() {
-        dialouges[0] = "Hello, traveler! So you have come to this place? ddddddddddddddddddddddddddddddddddddddddddddddddddddd";
+        dialouges[0] = "Hello, traveler! So you have come to this place?";
         dialouges[1] = "This village has been quiet for years...";
         dialouges[2] = "Good luck on your journey!";
-    }
-
-    public void draw(Graphics2D g2) {
-        int screenX = worldX - gamePanel.player.worldX + gamePanel.player.screenX;
-        int screenY = worldY - gamePanel.player.worldY + gamePanel.player.screenY;
-        BufferedImage gambar = null;
-
-        if (worldX + gamePanel.ukuranKotak > gamePanel.player.worldX - gamePanel.player.screenX &&
-                worldX - gamePanel.ukuranKotak < gamePanel.player.worldX + gamePanel.player.screenX &&
-                worldY + gamePanel.ukuranKotak > gamePanel.player.worldY - gamePanel.player.screenY &&
-                worldY - gamePanel.ukuranKotak < gamePanel.player.worldY + gamePanel.player.screenY) {
-
-            switch (arah) {
-                case "atas":
-                    gambar = jalanAtas[spriteNumber];
-                    break;
-                case "bawah":
-                    gambar = jalanBawah[spriteNumber];
-                    break;
-                case "kiri":
-                    gambar = jalanKiri[spriteNumber];
-                    break;
-                case "kanan":
-                    gambar = jalanKanan[spriteNumber];
-                    break;
-                default:
-                    break;
-            }
-            g2.drawImage(gambar, screenX, screenY, gamePanel.perbesarKotak, gamePanel.perbesarKotak, null);
-            g2.setColor(java.awt.Color.BLUE);
-            int collisionX = screenX + solidArea.x;
-            int collisionY = screenY + solidArea.y;
-            g2.drawRect(collisionX, collisionY, solidArea.width, solidArea.height);
-        }
     }
 
     // public void posisiAwal() {
@@ -75,17 +61,17 @@ public class NPCTua extends Entity {
     // arah = "kanan";
     // }
 
-    public void getJalanNPC() {
+    public void getJalanNPC(int jumlahFrame) {
         try {
-            for (int i = 0; i < 9; i++) {
-                jalanAtas[i] = ImageIO.read(getClass()
-                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Atas_/NPC_Jalan_Atas_" + i + ".png"));
-                jalanBawah[i] = ImageIO.read(getClass()
-                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Bawah_/NPC_Jalan_Bawah_" + i + ".png"));
-                jalanKiri[i] = ImageIO.read(getClass()
-                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Kiri_/NPC_Jalan_Kiri_" + i + ".png"));
-                jalanKanan[i] = ImageIO.read(getClass()
-                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Kanan_/NPC_Jalan_Kanan_" + i + ".png"));
+            for (int i = 0; i < jumlahFrame; i++) {
+                jalanAtas.add(ImageIO.read(getClass()
+                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Atas_/NPC_Jalan_Atas_" + i + ".png")));
+                jalanBawah.add(ImageIO.read(getClass()
+                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Bawah_/NPC_Jalan_Bawah_" + i + ".png")));
+                jalanKiri.add(ImageIO.read(getClass()
+                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Kiri_/NPC_Jalan_Kiri_" + i + ".png")));
+                jalanKanan.add(ImageIO.read(getClass()
+                        .getResourceAsStream("/Gambar/Npc/NPC_Jalan_Kanan_/NPC_Jalan_Kanan_" + i + ".png")));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,6 +79,7 @@ public class NPCTua extends Entity {
     }
 
     public void setAction() {
+
         actionLockCounter++;
         if (actionLockCounter == 60) {
             Random random = new Random();
@@ -114,5 +101,45 @@ public class NPCTua extends Entity {
             actionLockCounter = 0;
         }
 
+    }
+
+    public void draw(Graphics2D g2) {
+        int screenX = worldX - gamePanel.player.worldX + gamePanel.player.screenX;
+        int screenY = worldY - gamePanel.player.worldY + gamePanel.player.screenY;
+        BufferedImage gambar = null;
+
+        if (worldX + gamePanel.ukuranKotak > gamePanel.player.worldX - gamePanel.player.screenX &&
+                worldX - gamePanel.ukuranKotak < gamePanel.player.worldX + gamePanel.player.screenX &&
+                worldY + gamePanel.ukuranKotak > gamePanel.player.worldY - gamePanel.player.screenY &&
+                worldY - gamePanel.ukuranKotak < gamePanel.player.worldY + gamePanel.player.screenY) {
+
+            switch (arah) {
+                case "atas":
+                    gambar = jalanAtas.get(spriteNumber);
+                    break;
+                case "bawah":
+                    gambar = jalanBawah.get(spriteNumber);
+                    break;
+                case "kiri":
+                    gambar = jalanKiri.get(spriteNumber);
+                    break;
+                case "kanan":
+                    gambar = jalanKanan.get(spriteNumber);
+                    break;
+                default:
+                    break;
+            }
+            g2.drawImage(gambar, screenX, screenY, gamePanel.perbesarKotak, gamePanel.perbesarKotak, null);
+
+            // // debug = hitboc
+            // g2.setColor(java.awt.Color.red);
+            // int collisionX = screenX + solidArea.x;
+            // int collisionY = screenY + solidArea.y;
+            // g2.drawRect(collisionX, collisionY, solidArea.width, solidArea.height);
+
+            // // debug = ukuran image
+            // g2.setColor(java.awt.Color.GREEN);
+            // g2.drawRect(screenX, screenY, gamePanel.perbesarKotak, gamePanel.perbesarKotak);
+        }
     }
 }
